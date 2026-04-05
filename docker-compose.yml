@@ -46,25 +46,31 @@ services:
   # Processing - Apache Spark
   # ============================================
   spark-master:
-    image: apache/spark:3.5.0
+    build: ./docker/spark
     container_name: spark-master-de
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
     ports:
       - "7077:7077"    # Cluster manager
       - "8081:8080"    # Spark Master UI (remapped to avoid conflict with Airflow)
+    volumes:
+      - ./docker/spark/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
+      - ./spark-jobs:/opt/spark/jobs:ro
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 1G
     networks:
       - lakehouse
 
   spark-worker:
-    image: apache/spark:3.5.0
+    build: ./docker/spark
     container_name: spark-worker-de
     command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     environment:
       SPARK_WORKER_MEMORY: 1g
+    volumes:
+      - ./docker/spark/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf:ro
+      - ./spark-jobs:/opt/spark/jobs:ro
     depends_on:
       - spark-master
     deploy:
