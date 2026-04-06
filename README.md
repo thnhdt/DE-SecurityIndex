@@ -90,8 +90,34 @@ gold/           ← Aggregated analytics-ready (empty, for later)
 
 ## Data Flow
 
-```
+```text
 data/ (host) → minio-init → raw-landing/ (raw) + bronze/ (clean)
-                             ↓ (future: Spark)
-                             silver/ → gold/ → Dashboard
+                             ↓ (PySpark: silver_pipeline.py)
+                             silver/ (3NF Delta Tables) → gold/ (future) → Dashboard
 ```
+
+## Silver Layer Setup & Execution
+
+The Silver Layer transforms and normalizes the parsed JSON files from the Bronze layer into queryable 3NF Delta Lake tables within the `s3a://silver/` bucket. 
+
+### 1. Schema Overview
+The pipeline generates the following Delta tables using Spark SQL `UPSERT` capabilities:
+* **`dim_sources`**: Identifies data origins (e.g., vnexpress, soha).
+* **`dim_incident_categories`**: Maps categorical groupings (e.g., Traffic Accident, Fire).
+* **`dim_administrative_units`**: Hierarchical dimension mapping granular locations (District → City).
+* **`fact_extracted_incidents`**: Center transaction table containing the standardized `event_timestamp`, dimensional keys, confidence weights, and direct URLs for lineage tracing.
+
+* **`quality_audit_log`**: Logs the quality audit metrics for the Bronze layer data.
+
+### 2. Manual Execution (Spark Master)
+To manually execute the normalization pipeline that reads from Bronze and writes to Silver:
+```bash
+docker exec spark-master-de /opt/spark/bin/spark-submit /opt/spark/jobs/silver_pipeline.py
+```
+
+### 3. Verification & Querying
+To verify referential integrity or visually inspect the integrated 3NF schema, we have provided a query script that reads the created tables directly from the MinIO `silver` bucket:
+```bash
+docker exec spark-master-de /opt/spark/bin/spark-submit /opt/spark/jobs/query_silver.py
+```
+
