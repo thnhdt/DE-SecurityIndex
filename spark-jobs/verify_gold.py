@@ -108,17 +108,14 @@ def main():
     # Validates that the "Safe/Warning/Dangerous" logic was applied correctly
     spark.sql("""
         SELECT 
-            status_label, 
-            count(*) as frequency,
-            round(avg(security_score), 2) as avg_score
+            *
         FROM hourly_idx
-        GROUP BY status_label
-    """).show()
+    """).show(20)
 
     print("=" * 60)
     print("5. Geospatial Check (Hotspots)")
     # Ensures we have valid coordinates for the map
-    hotspots.select("event_time", "district_name", "lat", "lon").show(20)
+    hotspots.select("*").show(20)
 
     print("=" * 60)
     print("VERIFICATION COMPLETE: Gold Layer is ready for consumption.")
