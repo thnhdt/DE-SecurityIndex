@@ -53,6 +53,7 @@ def main():
     print(f"| Dim Locations        | {dim_location.count():<5} |")
     print(f"| Dim Incidents        | {dim_incident.count():<5} |")
     print(f"| Hourly Index Rows    | {hourly_idx.count():<5} |")
+    print(f"| Flat Hotspots        | {hotspots.count():<5} |")
 
     print("=" * 60)
     print("3. Star Schema Integrity Check (Fact -> Location -> Incident -> Time)")
