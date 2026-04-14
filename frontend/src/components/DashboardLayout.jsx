@@ -1,15 +1,73 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Layout, Input, Badge, Space, Select, DatePicker, List, Card, Tag, Switch, Row, Col, Statistic, Typography, ConfigProvider } from 'antd';
-import { BellOutlined, SearchOutlined, FireOutlined } from '@ant-design/icons';
+import { Layout, Space, Select, DatePicker, List, Card, Tag, Switch, Row, Col, Statistic, Typography, ConfigProvider } from 'antd';
+import { FireOutlined } from '@ant-design/icons';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import MapSection from './MapSection';
-import { Gold_Flat_Hotspots, Gold_Hourly_Security_Index, districtList, incidentTypes, severityConfig, incidentIcons } from '../data/mockData';
+import axiosClient from '../api/axiosClient';
+import { Gold_Hourly_Security_Index, districtList, incidentTypes, incidentTypeLabels, severityConfig, incidentIcons } from '../data/mockData';
+
+const DISTRICT_COORDS = {
+  "Quận 1": { lat: 10.7769, lng: 106.6923 },
+  "Quận 3": { lat: 10.7868, lng: 106.6878 },
+  "Quận 4": { lat: 10.7658, lng: 106.6869 },
+  "Quận 5": { lat: 10.7581, lng: 106.6791 },
+  "Quận 6": { lat: 10.7501, lng: 106.6710 },
+  "Quận 7": { lat: 10.7425, lng: 106.7146 },
+  "Quận 8": { lat: 10.7391, lng: 106.6563 },
+  "Quận 9": { lat: 10.8171, lng: 106.8358 },
+  "Quận 10": { lat: 10.7812, lng: 106.6703 },
+  "Quận 11": { lat: 10.7673, lng: 106.6606 },
+  "Quận 12": { lat: 10.8586, lng: 106.6365 },
+  "Bình Tân": { lat: 10.7863, lng: 106.5674 },
+  "Bình Thạnh": { lat: 10.8038, lng: 106.7118 },
+  "Gò Vấp": { lat: 10.8386, lng: 106.6669 },
+  "Phú Nhuận": { lat: 10.7969, lng: 106.6934 },
+  "Tân Bình": { lat: 10.7958, lng: 106.6660 },
+  "Tân Phú": { lat: 10.7796, lng: 106.6364 },
+  "Thủ Đức": { lat: 10.8418, lng: 106.7516 },
+  "Bình Chánh": { lat: 10.9121, lng: 106.5134 },
+  "Cần Giờ": { lat: 10.6403, lng: 106.7650 },
+  "Củ Chi": { lat: 11.0978, lng: 106.4898 },
+  "Hóc Môn": { lat: 10.9048, lng: 106.5970 },
+  "Nhà Bè": { lat: 10.7386, lng: 106.7501 },
+};
 
 const { Header, Sider, Content } = Layout;
-const { Search } = Input;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
+
+const getMarkerPosition = (hotspot) => {
+  if (hotspot.lat && hotspot.lon) {
+    return { lat: parseFloat(hotspot.lat), lng: parseFloat(hotspot.lon) };
+  }
+  const districtName = hotspot.district_name || "";
+  const districtKey = Object.keys(DISTRICT_COORDS).find(key => districtName.includes(key));
+  if (districtKey) {
+    const base = DISTRICT_COORDS[districtKey];
+    return {
+      lat: base.lat + (Math.random() - 0.5) * 0.03,
+      lng: base.lng + (Math.random() - 0.5) * 0.03,
+    };
+  }
+  return { lat: 10.7769, lng: 106.6923 };
+};
+
+const formatEventTime = (eventTime) => {
+  if (!eventTime || eventTime === 0) return "N/A";
+  let timeMs;
+  if (eventTime > 9999999999999) {
+    timeMs = Math.floor(eventTime / 1000000);
+  } else if (eventTime > 9999999999) {
+    timeMs = Math.floor(eventTime / 1000);
+  } else {
+    timeMs = eventTime;
+  }
+  const hours = Math.floor(timeMs / 3600000) % 24;
+  const minutes = Math.floor((timeMs % 3600000) / 60000);
+  const seconds = Math.floor((timeMs % 60000) / 1000);
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
 
 export default function DashboardLayout() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -17,34 +75,66 @@ export default function DashboardLayout() {
   const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [selectedIncidentType, setSelectedIncidentType] = useState(null);
   const [dateRange, setDateRange] = useState(null);
-  const [searchText, setSearchText] = useState('');
-  const [notifications] = useState(3);
+  const [hotspots, setHotspots] = useState([]);
+  const [hourlyData, setHourlyData] = useState([]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const filteredIncidents = useMemo(() => {
-    return Gold_Flat_Hotspots.filter(item => {
-      if (selectedDistrict && item.district_name !== selectedDistrict) return false;
-      if (selectedIncidentType && item.incident_type !== selectedIncidentType) return false;
-      if (dateRange && dateRange[0] && dateRange[1]) {
-        const itemDate = new Date(item.event_time.split(' ')[0]);
-        if (itemDate < dateRange[0].toDate() || itemDate > dateRange[1].toDate()) return false;
+  useEffect(() => {
+    const fetchHotspots = async () => {
+      try {
+        const url = selectedIncidentType
+          ? `/hotspots/type?type=${selectedIncidentType}`
+          : "/hotspots/all";
+        const data = await axiosClient.get(url);
+        setHotspots(data.success ? data.data : []);
+      } catch (err) {
+        console.error("Failed to fetch hotspots:", err);
+        setHotspots([]);
       }
-      if (searchText) {
-        const search = searchText.toLowerCase();
-        if (!item.district_name.toLowerCase().includes(search) && 
-            !item.incident_type.toLowerCase().includes(search)) return false;
+    };
+    fetchHotspots();
+  }, [selectedIncidentType]);
+
+  useEffect(() => {
+    const fetchHourlyData = async () => {
+      try {
+        const data = await axiosClient.get("/security/hourly");
+        setHourlyData(data.success ? data.data : []);
+      } catch (err) {
+        console.error("Failed to fetch hourly data:", err);
+        setHourlyData([]);
+      }
+    };
+    fetchHourlyData();
+  }, []);
+
+  const getIncidentLabel = (type) => incidentTypeLabels[type] || type;
+
+  const filteredIncidents = useMemo(() => {
+    return hotspots.filter(item => {
+      if (selectedDistrict && !item.district_name?.includes(selectedDistrict)) return false;
+      if (dateRange && dateRange[0] && dateRange[1]) {
+        const itemDate = item.event_time_iso ? new Date(item.event_time_iso) : null;
+        if (itemDate && (itemDate < dateRange[0].toDate() || itemDate > dateRange[1].toDate())) return false;
       }
       return true;
     });
-  }, [selectedDistrict, selectedIncidentType, dateRange, searchText]);
+  }, [hotspots, selectedDistrict, dateRange]);
+
+  const incidentsWithCoords = useMemo(() => {
+    return filteredIncidents.map(item => {
+      const pos = getMarkerPosition(item);
+      return { ...item, lat: pos.lat, lon: pos.lng };
+    });
+  }, [filteredIncidents]);
 
   const totalIncidents = filteredIncidents.length;
-  const avgSecurityScore = Gold_Hourly_Security_Index.length > 0 
-    ? (Gold_Hourly_Security_Index.reduce((sum, item) => sum + item.security_score, 0) / Gold_Hourly_Security_Index.length).toFixed(1)
+  const avgSecurityScore = hourlyData.length > 0 
+    ? (hourlyData.reduce((sum, item) => sum + (parseFloat(item.security_score) || 0), 0) / hourlyData.length).toFixed(1)
     : 0;
 
   const incidentByType = useMemo(() => {
@@ -56,6 +146,7 @@ export default function DashboardLayout() {
   }, [filteredIncidents]);
 
   const getSeverityTag = (severity) => {
+    if (severity <= 1) return null;
     const config = severityConfig[severity] || severityConfig[2];
     return <Tag color={config.color}>{config.label}</Tag>;
   };
@@ -81,17 +172,9 @@ export default function DashboardLayout() {
             <span className="header-logo">Urban Security Index</span>
           </div>
           <div className="header-right">
-            <Search 
-              placeholder="Tìm kiếm..." 
-              style={{ width: 200 }}
-              onSearch={setSearchText}
-            />
             <span className="header-time">
               {currentTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </span>
-            <Badge count={notifications} size="small">
-              <BellOutlined className="notification-icon" style={{ color: '#fff' }} />
-            </Badge>
           </div>
         </Header>
 
@@ -117,7 +200,7 @@ export default function DashboardLayout() {
                     value={selectedIncidentType}
                     onChange={setSelectedIncidentType}
                   >
-                    {incidentTypes.map(t => <Option key={t} value={t}>{t}</Option>)}
+                    {incidentTypes.map(t => <Option key={t} value={t}>{incidentTypeLabels[t] || t}</Option>)}
                   </Select>
                   <RangePicker 
                     style={{ width: '100%' }}
@@ -134,11 +217,11 @@ export default function DashboardLayout() {
                     <Card size="small" className="incident-card">
                       <div className="incident-card-header">
                         <span className="incident-type">
-                          {incidentIcons[item.incident_type]} {item.incident_type}
+                          {incidentIcons[item.incident_type]} {getIncidentLabel(item.incident_type)}
                         </span>
                         {getSeverityTag(item.severity_weight)}
                       </div>
-                      <div className="incident-time">{item.event_time}</div>
+                      <div className="incident-time">{formatEventTime(item.event_time)}</div>
                       <div className="incident-location">📍 {item.district_name}</div>
                     </Card>
                   )}
@@ -162,7 +245,7 @@ export default function DashboardLayout() {
                 }
               >
                 <div className="map-container">
-                  <MapSection incidents={filteredIncidents} mapMode={mapMode} />
+                  <MapSection incidents={incidentsWithCoords} mapMode={mapMode} />
                 </div>
               </Card>
             </div>
@@ -186,7 +269,7 @@ export default function DashboardLayout() {
                 <Col xs={24} sm={8}>
                   <Card title="Xu hướng sự cố theo giờ" className="chart-card">
                     <ResponsiveContainer width="100%" height={180}>
-                      <LineChart data={Gold_Hourly_Security_Index}>
+                      <LineChart data={hourlyData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="calculation_hour" />
                         <YAxis />

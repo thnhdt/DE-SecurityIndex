@@ -36,12 +36,20 @@ export const districtList = [
 ];
 
 export const incidentTypes = [
-  "Tai nạn giao thông",
-  "Cướp giật",
-  "Hỏa hoạn",
-  "Trộm cắp",
-  "Xâm phạm tài sản",
+  "Public Disorder",
+  "Traffic Jam",
+  "Traffic Accident",
+  "Fire",
+  "Crime",
 ];
+
+export const incidentTypeLabels = {
+  "Public Disorder": "Trật tự công cộng",
+  "Traffic Jam": "Kẹt xe",
+  "Traffic Accident": "Tai nạn giao thông",
+  "Fire": "Cháy",
+  "Crime": "Tội phạm",
+};
 
 export const severityConfig = {
   1: { color: 'success', label: 'Thấp' },
@@ -52,9 +60,9 @@ export const severityConfig = {
 };
 
 export const incidentIcons = {
-  "Tai nạn giao thông": "🚗",
-  "Cướp giật": "🔓",
-  "Hỏa hoạn": "🔥",
-  "Trộm cắp": "🦹",
-  "Xâm phạm tài sản": "🏠",
+  "Public Disorder": "⚠️",
+  "Traffic Jam": "🚛",
+  "Traffic Accident": "🚗",
+  "Fire": "🔥",
+  "Crime": "🦹",
 };

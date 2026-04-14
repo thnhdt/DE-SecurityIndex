@@ -18,11 +18,12 @@ const center = {
 };
 
 const libraries = ['visualization'];
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
 
 export default function MapSection({ incidents, mapMode }) {
   const [map, setMap] = useState(null);
   const [selectedMarker, setSelectedMarker] = useState(null);
-  const [heatmapData, setHeatmapData] = useState([]);
+  // const [heatmapData, setHeatmapData] = useState([]);
 
   const onLoad = useCallback((map) => {
     setMap(map);
@@ -48,7 +49,7 @@ export default function MapSection({ incidents, mapMode }) {
         dissipating: true,
       });
       heatmap.setMap(map);
-      
+
       return () => {
         heatmap.setMap(null);
       };
@@ -68,7 +69,7 @@ export default function MapSection({ incidents, mapMode }) {
   }, [incidents, mapMode, onMarkerClick]);
 
   return (
-    <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY" libraries={libraries}>
+    <LoadScript googleMapsApiKey={GOOGLE_MAPS_API_KEY} libraries={libraries}>
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}

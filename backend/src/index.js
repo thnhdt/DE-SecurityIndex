@@ -37,6 +37,7 @@ apiRouter.get("/", (req, res) => {
 
 app.use("/api", apiRouter);
 app.use("/api/hotspots", require("./route/hotSpots.route"));
+app.use("/api/security", require("./route/security.route"));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

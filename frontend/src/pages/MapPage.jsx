@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Map from "../components/Map";
 
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+
 const sampleMarkers = [
   { id: 1, lat: 10.8231, lng: 106.6297, label: "A", title: "Văn Lang University", type: "university" },
   { id: 2, lat: 10.8300, lng: 106.6350, label: "B", title: "Location B", type: "incident" },
@@ -43,7 +45,7 @@ export default function MapPage() {
           onSelect={handleSelect}
           onMarkerSelect={handleMarkerSelect}
           onMarkerClick={handleMarkerClick}
-          apiKey="YOUR_GOOGLE_MAPS_API_KEY"
+          apiKey={GOOGLE_MAPS_API_KEY}
           containerStyle={{ width: "100%", height: "60vh", borderRadius: 8 }}
           zoom={14}
         />

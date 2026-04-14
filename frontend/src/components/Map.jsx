@@ -46,7 +46,7 @@ export const Map = ({
     }, [onMarkerClick]);
 
     return (
-        <LoadScript googleMapsApiKey={apiKey}>
+        <LoadScript googleMapsApiKey={apiKey} libraries={["places", "geometry"]}>
             <GoogleMap
                 mapContainerStyle={containerStyle || { width: "100%", height: "40vh", borderRadius: 8, border: "1px solid #eee" }}
                 center={defaultCenter}

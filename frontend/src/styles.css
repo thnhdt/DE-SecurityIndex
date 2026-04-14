@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 32px;
 }
 
 .header-left {
@@ -162,4 +162,43 @@
   .map-container {
     height: 40vh;
   }
+}
+
+.hotspots-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.hotspots-section h2 {
+  margin-bottom: 16px;
+  color: #1f1f1f;
+  font-weight: 600;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-controls label {
+  font-weight: 500;
+  color: #595959;
+}
+
+.filter-controls select {
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.hotspot-count {
+  margin-left: auto;
+  color: #8c8c8c;
+  font-size: 14px;
 }
