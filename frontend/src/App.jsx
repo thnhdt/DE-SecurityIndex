@@ -1,6 +1,17 @@
-import Dashboard from "./components/Dashboard";
-import "./App.css";
+import DashboardLayout from "./components/DashboardLayout";
+import "./styles.css";
+import { ConfigProvider } from "antd";
 
 export default function App() {
-  return <Dashboard />;
+  return (
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#1677ff',
+        },
+      }}
+    >
+      <DashboardLayout />
+    </ConfigProvider>
+  );
 }

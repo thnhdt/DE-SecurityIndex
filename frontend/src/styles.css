@@ -1,0 +1,204 @@
+.dashboard-layout {
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-time {
+  color: #fff;
+  font-size: 14px;
+}
+
+.notification-icon {
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.dashboard-sider {
+  background: #fff;
+  overflow: auto;
+}
+
+.sider-content {
+  padding: 16px;
+}
+
+.filter-section {
+  margin-bottom: 24px;
+}
+
+.filter-section h4 {
+  margin-bottom: 12px;
+  color: #1f1f1f;
+  font-weight: 600;
+}
+
+.incident-list-section {
+  margin-top: 24px;
+}
+
+.incident-list-section h4 {
+  margin-bottom: 12px;
+  color: #1f1f1f;
+  font-weight: 600;
+}
+
+.incident-card {
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.incident-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.incident-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.incident-type {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.incident-time {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.incident-location {
+  font-size: 13px;
+  color: #595959;
+  margin-bottom: 8px;
+}
+
+.dashboard-content {
+  background: #f0f2f5;
+  min-height: 280px;
+}
+
+.content-top {
+  margin-bottom: 24px;
+}
+
+.map-card {
+  position: relative;
+}
+
+.map-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.map-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-container {
+  height: 55vh;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.content-bottom {
+  margin-top: 24px;
+}
+
+.stat-card {
+  height: 100%;
+}
+
+.analytics-grid {
+  margin-top: 24px;
+}
+
+.chart-card {
+  height: 100%;
+}
+
+.no-data-text {
+  text-align: center;
+  color: #8c8c8c;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 12px;
+  }
+  
+  .map-container {
+    height: 40vh;
+  }
+}
+
+.hotspots-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.hotspots-section h2 {
+  margin-bottom: 16px;
+  color: #1f1f1f;
+  font-weight: 600;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-controls label {
+  font-weight: 500;
+  color: #595959;
+}
+
+.filter-controls select {
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.hotspot-count {
+  margin-left: auto;
+  color: #8c8c8c;
+  font-size: 14px;
+}

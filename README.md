@@ -121,3 +121,33 @@ To verify referential integrity or visually inspect the integrated 3NF schema, w
 docker exec spark-master-de /opt/spark/bin/spark-submit /opt/spark/jobs/query_silver.py
 ```
 
+## Gold Layer Setup & Execution
+
+The Gold Layer acts as the consumption layer, transforming normalized Silver data into highly optimized structures for dashboards and analytical queries. This layer implements both a **Star Schema** for multi-dimensional analysis and **Flattened/Aggregated Tables** for high-performance real-time visualization.
+
+### 1. Gold Schema Design
+
+#### A. Multi-dimensional Analysis (Star Schema)
+Designed to support drill-down capabilities and complex filtering across the security landscape:
+* **`dim_time`**: Contains `time_key`, `hour`, `day`, `month`, `year`, and `is_weekend`.
+* **`dim_location`**: A denormalized hierarchy including `location_key`, `district_name`, and `city_name` for fast spatial filtering without the overhead of recursive joins.
+* **`dim_incident`**: Maps `incident_key` to `category_name` and `severity_weight`.
+* **`fact_security_events`**: The central transactional table containing `event_id`, foreign keys to all dimensions, spatial coordinates (`lat`, `lon`), and the pre-calculated `security_score_contribution`.
+
+#### B. Direct Consumption Tables (Flattened & Aggregated)
+Optimized for high-concurrency dashboard rendering and map engines:
+* **`gold_flat_hotspots`**: A denormalized wide table designed for real-time map visualization. Includes `event_time`, `district_name`, `incident_type`, `severity_weight`, and GPS coordinates.
+* **`gold_hourly_security_index`**: A time-series aggregate table used for line charts and KPI trends.
+    * **Metrics**: `total_incidents`, `security_score`.
+    * **Categorization**: Automatically labels districts as `Safe`, `Warning`, or `Dangerous` based on hourly security thresholds.
+
+### 2. Manual Execution
+To manually trigger the Gold layer transformation (Silver → Gold), which handles hierarchical flattening, KPI calculations, and historical upserts:
+```bash
+docker exec spark-master-de /opt/spark/bin/spark-submit /opt/spark/jobs/gold_pipeline.py
+```
+
+To verify referential integrity or visually inspect the de-normalize schema, we have provided a query script that reads the created tables directly from the MinIO `gold` bucket:
+```bash
+docker exec spark-master-de /opt/spark/bin/spark-submit /opt/spark/jobs/verify_gold.py
+```
